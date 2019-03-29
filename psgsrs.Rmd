@@ -1,0 +1,242 @@
+---
+title: "psgsrs_19.Rmd"
+output: html_document
+---
+
+#code to reproduce (hopefully) all graphs displayed during the presentation
+
+CNS length distribution
+
+```{r}
+rm(list=ls(all=TRUE))
+library(tidyverse)
+library(ggplot2)
+
+
+file.path <- "/insert/full/path/here"
+length_df <- read.table( paste0(file.path,"/path_to/CNS_Brassicaceae_at_gene_nodups_mi_ldv.txt"), row.names = NULL)
+colnames(length_df) <- "Length"
+med_len <- median(length_df$Length)
+ldv_graph <- length_df %>%
+  ggplot(aes(x=Length)) +
+  geom_density() +
+  xlim(0,250) +
+  geom_vline(xintercept = median(length_df$Length)) +
+  geom_text(aes(x=median(length_df$Length), label=paste0("Median length = ",median(length_df$Length)), y=0.05))
+ldv_graph
+#
+png(filename = paste0(file.path,"/CNS_Brassicaceae_at_gene_nodups_mi_ldv.png"), units = "in", res = 400, width = 11, height = 8.5)
+  plot(ldv_graph)
+  dev.off()
+
+```
+
+Subsampling graph:
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+file.path <- "/path/to/files"
+mi_mo_gene_sub <- read.table(file = paste0(file.path,"/mi_mo_gene_sub.txt"),sep = "\t",row.names = NULL, header = T)
+
+colnames(mi_mo_gene_sub)[3] <- "Mean Unique Sequences"
+
+all_line_graph <- mi_mo_gene_sub %>%
+  ggplot(aes(x = Ecotypes, y = `Mean Unique Sequences`, colour = Type)) +
+  scale_color_manual(values = c("#F8766D", "#00BA38", "#619CFF")) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin = `Mean Unique Sequences` -Stdev, ymax=`Mean Unique Sequences`+Stdev),position=position_dodge(0.05)) +
+  ylim(0,6000) +
+  xlim(0,30) +
+  ggtitle(label = "Subsampling Across Ecotypes") +
+  theme_minimal()
+all_line_graph
+#
+png(filename = paste0(file.path,"all_subsample_graph.png"), units = "in", height = 4.18, width = 7.42, res = 600)
+  plot(all_line_graph)
+  dev.off()
+
+#lets only do PAV_Gene, then layer PosV_CNS
+library(scales)
+show_col(hue_pal()(3))
+#red: #F8766D   PAV_Gene
+#green: #00BA38 PosV_CNS
+#blue: #619CFF  PAV_CNS
+
+gene_line_graph <- mi_mo_gene_sub[mi_mo_gene_sub$Type == "PAV_Gene",] %>%
+  ggplot(aes(x = Ecotypes, y = `Mean Unique Sequences`, colour = Type)) +
+  scale_color_manual(values = c("#F8766D")) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin = `Mean Unique Sequences` -Stdev, ymax=`Mean Unique Sequences`+Stdev),position=position_dodge(0.05)) +
+  ylim(0,6000) +
+  xlim(0,30) +
+  ggtitle(label = "Subsampling Across Ecotypes") +
+  theme_minimal()
+gene_line_graph
+#
+png(filename = paste0(file.path,"all_subsample_graph_1.png"), units = "in", height = 4.18, width = 7.42, res = 600)
+  plot(gene_line_graph)
+  dev.off()
+
+gene_posv_line_graph <- mi_mo_gene_sub[mi_mo_gene_sub$Type != "PAV_CNS" ,] %>%
+  ggplot(aes(x = Ecotypes, y = `Mean Unique Sequences`, colour = Type)) +
+  scale_color_manual(values = c("#F8766D","#00BA38")) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin = `Mean Unique Sequences` -Stdev, ymax=`Mean Unique Sequences`+Stdev),position=position_dodge(0.05)) +
+  ylim(0,6000) +
+  xlim(0,30) +
+  ggtitle(label = "Subsampling Across Ecotypes") +
+  theme_minimal()
+gene_posv_line_graph
+#
+png(filename = paste0(file.path,"all_subsample_graph_2.png"), units = "in", height = 4.18, width = 7.42, res = 600)
+  plot(gene_posv_line_graph)
+  dev.off()
+
+```
+
+model depth graph code
+```{r}
+#rm(list=ls(all=TRUE))
+library(tidyverse)
+library(ggplot2)
+
+file.path <- "/path/to/file"
+#read in dataframe
+cns_model_depth <- read.table(file = paste0(file.path,"/cns_atac_model_depth.txt"), sep = "\t", row.names = NULL,header = T)
+
+#reorder stack
+#cns_model_depth$Type_f = factor(cns_model_depth$Type, levels=c('tair10','coll','tair10_missing','moved','ATAC'))
+
+#rename things
+colnames(cns_model_depth) <- c("Feature","Coords","Depth","Density","Gene Distance","Type_f")
+cns_model_depth$Feature <- gsub("tair10_missing","PAV",cns_model_depth$Feature)
+cns_model_depth$Feature <- gsub("tair10","Col-0",cns_model_depth$Feature)
+cns_model_depth$Feature <- gsub("coll","Collinear",cns_model_depth$Feature)
+cns_model_depth$Feature <- gsub("moved","PosV",cns_model_depth$Feature)
+
+#redo factors
+cns_model_depth$Type_f = factor(cns_model_depth$Feature, levels=c('Col-0','Collinear','PAV','PosV','ATAC'))
+levels(cns_model_depth$Type_f)
+
+cns_model_depth_graph <- cns_model_depth %>%
+  ggplot(aes(x = `Gene Distance`, y = `Density`)) +
+  geom_line(aes(colour = Feature))+
+  ylim(0,0.00175) +
+  xlim(-2000,2000) +
+  ggtitle("Feature density relative to the proximate gene") +
+  facet_grid(rows = vars(Type_f)) +
+  scale_color_discrete(breaks=c('Col-0','Collinear','PAV','PosV','ATAC')) +
+  theme_minimal() +
+  theme(legend.text=element_text(size=25),
+        legend.title = element_text(size = 25),
+        axis.text=element_text(size=25),
+        axis.title.x = element_text(size=25),
+        axis.title.y = element_text(size=25),
+        axis.text.y = element_blank(),
+        title = element_text(size=25),
+        strip.text.y = element_text(size = 20)) 
+cns_model_depth_graph
+  #cns_model_depth_graph_1500_all <- cns_model_depth_graph
+#cns_model_depth_graph_all_0.0015 <- cns_model_depth_graph
+#cns_model_depth_graph_2500_0.002 <- cns_model_depth_graph
+
+#savsies
+png(filename = paste0(file.path,"06_model_depth/cns_atac_model_depth_graph_stacked.png"), units = "in", res = 600, width = 11, height = 8.5)
+  plot(cns_model_depth_graph)
+  dev.off()
+```
+
+pca plots:
+
+```{r}
+library("transformr")
+library("gganimate")
+#missing to moved
+library(ggrepel)
+
+file.path <- "/path_to_file/"
+merged_df <- read.table(file = paste0(file.path,"pca_data_table.txt"),sep = "\t",row.names = NULL, header = T)
+
+moved_to_missing <- merged_df[merged_df$Tag == "Missing" | merged_df$Tag == "Moved",]
+moved_to_missing$Tag <- gsub("Missing", "PAV", moved_to_missing$Tag) 
+moved_to_missing$Tag <- gsub("Moved", "PosV", moved_to_missing$Tag)
+moved_to_missing$Accession <- as.character(moved_to_missing$Accession)
+
+#translate to common names
+info_table <- read.table(file = paste0(file.path,"/final_gen_eco_cn_id.txt"),sep = "\t",row.names = NULL,header = T)
+#easiest way to switch out names....
+#i <- 1
+cn_vect <- c()
+
+for (i in 1:nrow(moved_to_missing)) {
+  srr_split <- unlist(strsplit(moved_to_missing$Accession[i], split = "_"))
+  cn_index <- which(grepl(srr_split[1],info_table$SRR))
+  common_name <- as.character(info_table$Common_Name[cn_index])
+  cn_vect <- c(cn_vect,common_name)
+}
+moved_to_missing <- cbind(moved_to_missing, cn_vect)
+
+moved_to_missing_plot <- ggplot(moved_to_missing, aes(PC2, PC1)) +
+  geom_point(aes(colour = Group), size = 3) +
+  theme(legend.text=element_text(size=25),
+        legend.title = element_text(size = 25),
+        axis.text=element_text(size=25),
+        axis.title.x = element_text(size=25),
+        axis.title.y = element_text(size=25),
+        title = element_text(size=25)) +
+  labs(fill="Admixture Group") +
+  #theme(legend.text=element_text(size=50)) +
+  labs(title="state: {closest_state}") +
+  #ggrepel::geom_text_repel(label=moved_to_missing$Accession, point.padding = 2) +
+  #ggrepel::geom_text_repel(label=moved_to_missing$cn_vect, box.padding = unit(3, 'lines')) +
+  transition_states(Tag)
+animate(moved_to_missing_plot, width = 800, height = 450)
+#?animate()
+
+anim_save(paste0(file.path,"/moved_to_missing_pca_50.gif"), moved_to_missing_plot, units = "in", width = (7.76*2), height = (5.63*2), res = 100)
+dev.off()
+```
+
+Normal distribution figure
+
+```{r}
+#
+library(tidyverse)
+library(ggplot2)
+
+file.path <- "/path/to/output"
+#make normal distribution dataframe
+test_seq <- seq(-5, 5, by = .01)
+test_df <- data.frame(X = test_seq,
+                      Prob = dnorm(test_seq))
+#
+test_dist <- test_df %>%
+  ggplot(aes(x = X, y = Prob)) +
+  geom_point() +
+ # theme(axis.title.y = element_blank()) +
+  theme_void()
+test_dist
+#
+
+png(filename = paste0(file.path,"/normal_dist.png"),width = 5.21, height = 2.47, res = 600, units = "in")
+  plot(test_dist)
+  dev.off()
+```
+
+
+
+
+
+
+
+
+
+
+  
+  
+  

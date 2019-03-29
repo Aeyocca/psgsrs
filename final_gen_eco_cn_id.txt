@@ -1,0 +1,31 @@
+SRR	ecotype	geo_loc_name	Group	Common_Name
+SRR1945446	430	Austria	central_europe	Gr-1
+SRR1945460	687	USA	germany	LI-EF-018
+SRR1945476	991	Sweden	south_sweden	Ale-Stenar-41-1
+SRR1945575	5748	United Kingdom	germany	Kil-0
+SRR1945600	5950	Czech Republic	central_europe	DraIV 5-12
+SRR1945757	6909	USA	germany	Col-0
+SRR1945758	6911	Cape Verde	relict	Cvi-0
+SRR1945764	6920	Germany	admixed	Got-22
+SRR1945773	6933	Spain	spain	LL-0
+SRR1945796	6976	Austria	central_europe	Uod-7
+SRR1945808	7002	Netherlands	germany	Baa-1
+SRR1945811	7013	Germany	south_sweden	Bd-0
+SRR1945818	7036	Germany	germany	Bu-0
+SRR1945826	7071	France	western_europe	Chat-1
+SRR1945829	7081	Portugal	spain	Co
+SRR1945844	7127	Estonia	admixed	Est
+SRR1945852	7161	Germany	germany	Gd-1
+SRR1945858	7177	Czech Republic	central_europe	Jm-0
+SRR1945861	7186	Lithuania	central_europe	Kn-0
+SRR1945869	7213	Germany	admixed	Ler-0
+SRR1945879	7258	Germany	germany	Nw-0
+SRR1945881	7273	Germany	central_europe	No-0
+SRR1945883	7280	Germany	germany	Old-1
+SRR1945916	7373	Japan	admixed	Tsu-0
+SRR1945995	8312	Germany	germany	Is-0
+SRR1946002	8354	Russia	asia	Per-1
+SRR1946036	9100	Georgia	italy_balkan_caucasus	Lag1-2
+SRR1946047	9125	Armenia	asia	Geg-14
+SRR1946330	9764	Lebanon	admixed	Qar-8a
+SRR1946555	14312	Russia	asia	Kos-1
